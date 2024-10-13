@@ -14,12 +14,14 @@ const AmountInput = ({
   setStakeAmount,
   handleStakeAmountChange,
   disabled,
+  label,
 }: {
   sourceChainId: ChainIds;
   sourceToken: TokenData | undefined;
   tokenBalance: any;
   stakeAmount: string;
   setStakeAmount: any;
+  label?: string;
   handleStakeAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
 }) => {
@@ -30,7 +32,7 @@ const AmountInput = ({
           className={cn('font-normal', disabled ? 'opacity-50' : '')}
           htmlFor='stakeAmount'
         >
-          Amount
+          {label || 'Amount'}
         </Label>
         <span
           onClick={() => setStakeAmount(tokenBalance?.formatted || '')}

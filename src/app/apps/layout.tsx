@@ -11,7 +11,7 @@ export default function Layout({ children, modal }: { children: React.ReactNode;
         {children}
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

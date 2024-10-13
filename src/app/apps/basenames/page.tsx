@@ -4,8 +4,19 @@ import AmountInput from '@/components/AmountInput';
 import CurrencyAndChainSelector from '@/components/CurrencyAndChainSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { Command as CommandPrimitive } from 'cmdk';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { INTENTS_BASE_URI } from '@/constants';
 import { ChainIds } from '@/constants/chains';
@@ -18,10 +29,14 @@ import { formatNumber } from '@/lib/formatNumber';
 import { NATIVE, cn, updateDbTransaction } from '@/lib/utils';
 import { ComposeCalldataResponse, FeeQuoteCalldataResponse, ProtocolParamsResponse } from '@/types/intents';
 import { useQuery } from '@tanstack/react-query';
+import { CommandLoading } from 'cmdk';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDebounceValue } from 'usehooks-ts';
 import { formatUnits, zeroAddress } from 'viem';
+import { useReadContract } from 'wagmi';
+import { Search } from 'lucide-react';
 
 const TxButtons = dynamic(() => import('@/components/TxButton'), {
   ssr: false,
@@ -41,10 +56,10 @@ const Page = () => {
   const [sourceChainId, setSourceChainId] = useState<ChainIds>('137');
   const [sourceToken, setSourceToken] = useState<Token | undefined>();
 
-  //   const [stakeAmount, setStakeAmount] = useState<string>('');
-  //   const [debouncedStakeAmount] = useDebounceValue(stakeAmount, 1000);
-
   const [baseName, setBaseName] = useState<string>('');
+  const [debouncedBaseName] = useDebounceValue(baseName, 500);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
   // duration in years
   const [duration, setDuration] = useState<number>(1);
 
@@ -73,7 +88,69 @@ const Page = () => {
     return baseName.includes(' ') ? new Error('Basename cannot include spaces') : undefined;
   }, [baseName]);
 
-  const { data: ethPrice, isLoading: isEthPriceLoading } = useQuery({
+  const { data: isBaseNameAvailable, isLoading: isBaseNameAvailableLoading } = useReadContract({
+    abi: [
+      {
+        inputs: [{ internalType: 'string', name: 'name', type: 'string' }],
+        name: 'available',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const,
+    // BASE REGISTRAR CONTROLLER
+    address: '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5',
+    chainId: 8453,
+    functionName: 'available',
+    args: [debouncedBaseName],
+    query: {
+      enabled: !!debouncedBaseName,
+    },
+  });
+  const { data: registerPrice, isLoading: isRegisterPriceLoading } = useReadContract({
+    abi: [
+      {
+        inputs: [
+          { internalType: 'string', name: 'name', type: 'string' },
+          { internalType: 'uint256', name: 'duration', type: 'uint256' },
+        ],
+        name: 'registerPrice',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const,
+    // BASE REGISTRAR CONTROLLER
+    address: '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5',
+    chainId: 8453,
+    functionName: 'registerPrice',
+    args: [debouncedBaseName, BigInt(duration * 365 * 24 * 60 * 60)],
+    query: {
+      enabled: !!debouncedBaseName,
+    },
+  });
+
+  const { data: suggestions, isLoading: isSuggestionsLoading } = useQuery({
+    queryKey: ['basename suggestions', debouncedBaseName],
+    queryFn: async () => {
+      const res = (await fetch(`/api/basename`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: debouncedBaseName,
+        }),
+      }).then((res) => res.json())) as {
+        suggestion?: Array<string>;
+      };
+
+      return res?.suggestion;
+    },
+    enabled: !!debouncedBaseName,
+  });
+
+  const { data: ethPriceUsd, isLoading: isEthPriceLoading } = useQuery({
     queryKey: ['eth price'],
     queryFn: async () => {
       return await fetch(`https://price-api.crypto.com/price/v1/token-price/ethereum`, {
@@ -141,7 +218,7 @@ const Page = () => {
 
       return data.PayLoad as ProtocolParamsResponse;
     },
-    enabled: !!(sourceToken && sourceChainId),
+    enabled: !!(sourceToken && sourceChainId && baseName && isBaseNameAvailable && !isBaseNameAvailableLoading),
     staleTime: 45_000, // 30 seconds
     retry: false,
   });
@@ -213,7 +290,7 @@ const Page = () => {
 
       return data.PayLoad as ComposeCalldataResponse;
     },
-    enabled: !!(protocolQuote && !isProtocolQuoteLoading && !balanceError),
+    enabled: !!(protocolQuote && !isProtocolQuoteLoading && !balanceError && currentAccount),
   });
 
   const bridgeFee = useMemo(() => {
@@ -230,10 +307,10 @@ const Page = () => {
 
     bridgeFeeReserve = Number(formatUnits(BigInt(feeAmount), quoteBridgeFees?.decimals || 18));
     bridgeToken = quoteBridgeFees?.symbol;
-    bridgeFee = bridgeToken === 'ETH' || bridgeToken === 'WETH' ? bridgeFeeReserve * ethPrice : bridgeFeeReserve;
+    bridgeFee = bridgeToken === 'ETH' || bridgeToken === 'WETH' ? bridgeFeeReserve * ethPriceUsd : bridgeFeeReserve;
 
     return bridgeFee;
-  }, [ethPrice, feeQuote]);
+  }, [ethPriceUsd, feeQuote]);
 
   const clearInputs = useCallback(() => {}, []);
 
@@ -268,9 +345,9 @@ const Page = () => {
       <div className='mx-auto flex w-full max-w-[50ch] flex-col gap-2'>
         <Card className='rounded-2xl'>
           <CardHeader>
-            <CardTitle className='text-3xl text-blue-500'>Get Your Basenames</CardTitle>
-            <CardDescription>Powered by Router Intents</CardDescription>
+            <CardTitle className='text-3xl text-blue-500'>Super Basenames</CardTitle>
           </CardHeader>
+
           <CardContent className='flex flex-col gap-4'>
             <div className='grid w-full items-center gap-1.5'>
               <div className='flex justify-between'>
@@ -278,17 +355,98 @@ const Page = () => {
                   className={cn('font-normal')}
                   htmlFor='basename'
                 >
-                  Find your Basename
+                  Your Basename
                 </Label>
 
                 {baseNameError && <span className='text-sm leading-none text-red-500'>{baseNameError.message}</span>}
               </div>
-              <Input
-                type='text'
-                value={baseName}
-                className={cn(baseNameError ? 'ring-2  ring-red-500' : '')}
-                onChange={handleBaseNameChange}
-              />
+
+              <Popover
+                open={dropdownOpen}
+                onOpenChange={setDropdownOpen}
+              >
+                <Command shouldFilter={false}>
+                  <PopoverTrigger asChild>
+                    <div
+                      className='relative flex items-center border-b px-3'
+                      cmdk-input-wrapper=''
+                    >
+                      <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
+                      <CommandPrimitive.Input
+                        className={cn(
+                          'z-[2] flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                          baseNameError ? 'ring-2  ring-red-500' : '',
+                        )}
+                        value={baseName}
+                        onChangeCapture={handleBaseNameChange}
+                        placeholder='Search rednobull.base.eth'
+                      />
+
+                      {baseName && (
+                        <span className='absolute top-1/2 z-[1] ml-8 -translate-y-1/2 select-none text-sm opacity-50'>
+                          <span className='text-transparent'>{baseName}</span>
+                          <span>.base.eth</span>
+                        </span>
+                      )}
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className='w-[--radix-popover-trigger-width] p-0'
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                  >
+                    <CommandList>
+                      <CommandEmpty>Start by finding your name!</CommandEmpty>
+
+                      {baseName ? (
+                        <CommandItem
+                          className='h-10'
+                          key={`${baseName} .base.eth`}
+                          disabled={!isBaseNameAvailable}
+                          onSelect={() => {
+                            setBaseName(baseName);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          <span className='mr-2'>
+                            {baseName}
+                            <span className='opacity-75'>.base.eth</span>
+                          </span>
+                          {isBaseNameAvailableLoading ||
+                          isBaseNameAvailable === undefined ||
+                          baseName !== debouncedBaseName ? (
+                            <span className='text-xs text-neutral-500/80'>Checking...</span>
+                          ) : isBaseNameAvailable ? (
+                            <span className='text-xs text-blue-500/80'>Available</span>
+                          ) : (
+                            <span className='text-xs text-red-500/80'>Unavailable</span>
+                          )}
+                        </CommandItem>
+                      ) : (
+                        <CommandItem disabled={true}>Search for a name</CommandItem>
+                      )}
+
+                      {!isSuggestionsLoading && suggestions && suggestions?.length > 0 && (
+                        <CommandGroup heading='Suggestions'>
+                          <CommandSeparator />
+                          {suggestions.map((suggestion, index) => (
+                            <CommandItem
+                              className='h-10'
+                              key={`${suggestion} .base.eth ${index}`}
+                              onSelect={() => {
+                                setBaseName(suggestion);
+                                setDropdownOpen(false);
+                              }}
+                            >
+                              <span>{suggestion}</span>
+                              <span className='opacity-75'>.base.eth</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </CommandList>
+                  </PopoverContent>
+                </Command>
+              </Popover>
             </div>
 
             {/* duration in years */}
@@ -304,9 +462,26 @@ const Page = () => {
 
               {/* plus, minus buttons around the current value */}
               <div className='flex gap-2'>
-                <Button variant='outline'>-</Button>
-                <Input />
-                <Button variant='outline'>+</Button>
+                <Button
+                  variant='outline'
+                  onClick={() => duration > 1 && setDuration(duration - 1)}
+                >
+                  -
+                </Button>
+
+                <Input
+                  className='w-full text-center'
+                  type='text'
+                  value={`${duration} year${duration > 1 ? 's' : ''}`}
+                  onChange={() => {}}
+                />
+
+                <Button
+                  variant='outline'
+                  onClick={() => setDuration(duration + 1)}
+                >
+                  +
+                </Button>
               </div>
             </div>
 
@@ -329,11 +504,12 @@ const Page = () => {
               sourceToken={sourceToken}
               stakeAmount={'12'}
               tokenBalance={tokenBalance}
+              label='You Pay'
             />
           </CardContent>
 
           <CardFooter className='mt-8 flex flex-col gap-4'>
-            <div className='grid w-full grid-cols-2 gap-2 rounded-xl border border-neutral-800 bg-background/25 p-2'>
+            <div className='grid w-full grid-cols-3 gap-2 rounded-xl border border-neutral-800 bg-background/25 p-2'>
               <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
                 <span className='text-xs'>ETA</span>
                 <span
@@ -350,7 +526,7 @@ const Page = () => {
                 </span>
               </div>
               <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
-                <span className='text-xs'>Total Fee</span>
+                <span className='text-xs'>Bridge Fee</span>
                 <span
                   className={cn(
                     'text-base font-medium text-neutral-300',
@@ -362,6 +538,20 @@ const Page = () => {
                   $ {isProtocolQuoteLoading || isfeeQuoteLoading ? 'Loading...' : formatNumber(bridgeFee)}
                 </span>
               </div>
+              <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
+                <span className='text-xs'>Registration Fee</span>
+                <span
+                  className={cn(
+                    'text-base font-medium text-neutral-300',
+                    isRegisterPriceLoading ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent' : '',
+                  )}
+                >
+                  ${' '}
+                  {isRegisterPriceLoading
+                    ? 'Loading...'
+                    : formatNumber(parseFloat(formatUnits(registerPrice || 0n, 18)) * ethPriceUsd)}
+                </span>
+              </div>
             </div>
 
             <TxButtons
@@ -370,7 +560,7 @@ const Page = () => {
               label={
                 calldataQuote?.prioritySteps[step]
                   ? calldataQuote?.prioritySteps[step].instructionTitle || 'Transact'
-                  : 'Stake'
+                  : 'Buy Basename'
               }
               error={calldataQuoteError || transactionError || protocolQuoteError || balanceError}
               handleComplete={() => {}}
