@@ -1,0 +1,20 @@
+{
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chainId": "324",
+        "symbol": "ETH",
+        "decimals": 18
+    },
+    "0x176211869cA2b568f2A7D4EE941E073a821EE1ff": {
+        "address": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+        "chainId": "324",
+        "symbol": "USDT",
+        "decimals": 6
+    },
+    "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4": {
+        "address": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
+        "chainId": "324",
+        "symbol": "USDC",
+        "decimals": 6
+    }
+}

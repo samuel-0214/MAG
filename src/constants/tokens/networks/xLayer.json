@@ -1,0 +1,20 @@
+{
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chainId": "196",
+        "symbol": "OKB",
+        "decimals": 18
+    },
+    "0x74b7f16337b8972027f6196a17a631ac6de26d22": {
+        "address": "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        "chainId": "196",
+        "symbol": "USDC",
+        "decimals": 6
+    },
+    "0x5a77f1443d16ee5761d310e38b62f77f726bc71c": {
+        "address": "0x5a77f1443d16ee5761d310e38b62f77f726bc71c",
+        "chainId": "196",
+        "symbol": "WETH",
+        "decimals": 18
+    }
+}

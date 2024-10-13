@@ -1,0 +1,14 @@
+{
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chainId": "43113",
+        "symbol": "AVAX",
+        "decimals": 18
+    },
+    "0xb452b513552aa0b57c4b1c9372efea78024e5936": {
+        "address": "0xb452b513552aa0b57c4b1c9372efea78024e5936",
+        "chainId": "43113",
+        "symbol": "USDT",
+        "decimals": 6
+    }
+}

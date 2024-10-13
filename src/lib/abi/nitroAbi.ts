@@ -1,0 +1,35 @@
+export const NitroAbi = [
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: 'uint256', name: 'partnerId', type: 'uint256' },
+      { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
+      { indexed: false, internalType: 'bytes32', name: 'destChainIdBytes', type: 'bytes32' },
+      { indexed: false, internalType: 'uint256', name: 'destAmount', type: 'uint256' },
+      { indexed: false, internalType: 'uint256', name: 'depositId', type: 'uint256' },
+      { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' },
+      { indexed: false, internalType: 'address', name: 'depositor', type: 'address' },
+      { indexed: false, internalType: 'bytes', name: 'recipient', type: 'bytes' },
+      { indexed: false, internalType: 'bytes', name: 'destToken', type: 'bytes' },
+    ],
+    name: 'FundsDeposited',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: 'uint256', name: 'partnerId', type: 'uint256' },
+      { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
+      { indexed: false, internalType: 'bytes32', name: 'destChainIdBytes', type: 'bytes32' },
+      { indexed: false, internalType: 'uint256', name: 'destAmount', type: 'uint256' },
+      { indexed: false, internalType: 'uint256', name: 'depositId', type: 'uint256' },
+      { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' },
+      { indexed: false, internalType: 'bytes', name: 'recipient', type: 'bytes' },
+      { indexed: false, internalType: 'address', name: 'depositor', type: 'address' },
+      { indexed: false, internalType: 'bytes', name: 'destToken', type: 'bytes' },
+      { indexed: false, internalType: 'bytes', name: 'message', type: 'bytes' },
+    ],
+    name: 'FundsDepositedWithMessage',
+    type: 'event',
+  },
+];

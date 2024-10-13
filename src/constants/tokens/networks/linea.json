@@ -1,0 +1,62 @@
+{
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chainId": "59144",
+        "symbol": "ETH",
+        "decimals": 18
+    },
+    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f": {
+        "address": "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+        "chainId": "59144",
+        "symbol": "WETH",
+        "decimals": 18
+    },
+    "0xA219439258ca9da29E9Cc4cE5596924745e12B93": {
+        "address": "0xA219439258ca9da29E9Cc4cE5596924745e12B93",
+        "chainId": "59144",
+        "symbol": "USDT",
+        "decimals": 6
+    },
+    "0x176211869cA2b568f2A7D4EE941E073a821EE1ff": {
+        "address": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+        "chainId": "59144",
+        "symbol": "USDC",
+        "decimals": 6
+    },
+    "0xcc22F6AA610D1b2a0e89EF228079cB3e1831b1D1": {
+        "address": "0xcc22F6AA610D1b2a0e89EF228079cB3e1831b1D1",
+        "chainId": "59144",
+        "symbol": "LVC",
+        "decimals": 18
+    },
+    "0x1a51b19ce03dbe0cb44c1528e34a7edd7771e9af": {
+        "address": "0x1a51b19ce03dbe0cb44c1528e34a7edd7771e9af",
+        "chainId": "59144",
+        "symbol": "LYNX",
+        "decimals": 18
+    },
+    "0x78354f8dccb269a615a7e0a24f9b0718fdc3c7a7": {
+        "address": "0x78354f8dccb269a615a7e0a24f9b0718fdc3c7a7",
+        "chainId": "59144",
+        "symbol": "ZERO",
+        "decimals": 18
+    },
+    "0x3aab2285ddcddad8edf438c1bab47e1a9d05a9b4": {
+        "address": "0x3aab2285ddcddad8edf438c1bab47e1a9d05a9b4",
+        "chainId": "59144",
+        "symbol": "WBTC",
+        "decimals": 8
+    },
+    "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F": {
+        "address": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
+        "chainId": "59144",
+        "symbol": "wstETH",
+        "decimals": 18
+    },
+    "0x1Bf74C010E6320bab11e2e5A532b5AC15e0b8aA6": {
+        "address": "0x1Bf74C010E6320bab11e2e5A532b5AC15e0b8aA6",
+        "chainId": "59144",
+        "symbol": "weETH",
+        "decimals": 18
+    }
+}

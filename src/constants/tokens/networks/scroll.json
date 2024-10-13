@@ -1,0 +1,62 @@
+{
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chainId": "534352",
+        "symbol": "ETH",
+        "decimals": 18
+    },
+    "0xf55bec9cafdbe8730f096aa55dad6d22d44099df": {
+        "address": "0xf55bec9cafdbe8730f096aa55dad6d22d44099df",
+        "chainId": "534352",
+        "symbol": "USDT",
+        "decimals": 6
+    },
+    "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4": {
+        "address": "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4",
+        "chainId": "534352",
+        "symbol": "USDC",
+        "decimals": 6
+    },
+    "0x01f0a31698c4d065659b9bdc21b3610292a1c506": {
+        "address": "0x01f0a31698c4d065659b9bdc21b3610292a1c506",
+        "chainId": "534352",
+        "symbol": "weETH",
+        "decimals": 18
+    },
+    "0xf610a9dfb7c89644979b4a0f27063e9e7d7cda32": {
+        "address": "0xf610a9dfb7c89644979b4a0f27063e9e7d7cda32",
+        "chainId": "534352",
+        "symbol": "wstETH",
+        "decimals": 18
+    },
+    "0xcA77eB3fEFe3725Dc33bccB54eDEFc3D9f764f97": {
+        "address": "0xcA77eB3fEFe3725Dc33bccB54eDEFc3D9f764f97",
+        "chainId": "534352",
+        "symbol": "DAI",
+        "decimals": 18
+    },
+    "0xAAAE8378809bb8815c08D3C59Eb0c7D1529aD769": {
+        "address": "0xAAAE8378809bb8815c08D3C59Eb0c7D1529aD769",
+        "chainId": "534352",
+        "symbol": "NURI",
+        "decimals": 18
+    },
+    "0x80137510979822322193fc997d400d5a6c747bf7": {
+        "address": "0x80137510979822322193fc997d400d5a6c747bf7",
+        "chainId": "534352",
+        "symbol": "STONE",
+        "decimals": 18
+    },
+    "0x5300000000000000000000000000000000000004": {
+        "address": "0x5300000000000000000000000000000000000004",
+        "chainId": "534352",
+        "symbol": "WETH",
+        "decimals": 18
+    },
+    "0xa25b25548b4c98b0c7d3d27dca5d5ca743d68b7f": {
+        "address": "0xa25b25548b4c98b0c7d3d27dca5d5ca743d68b7f",
+        "chainId": "534352",
+        "symbol": "wrsTH",
+        "decimals": 18
+    }
+}

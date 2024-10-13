@@ -1,0 +1,14 @@
+{
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chainId": "534351",
+        "symbol": "ETH",
+        "decimals": 18
+    },
+    "0x5300000000000000000000000000000000000004": {
+        "address": "0x5300000000000000000000000000000000000004",
+        "chainId": "534351",
+        "symbol": "ETH",
+        "decimals": 18
+    }
+}
