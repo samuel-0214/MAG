@@ -533,6 +533,7 @@ const Page = () => {
               stakeAmount={protocolQuote?.amount[0].toString() || '0'}
               tokenBalance={tokenBalance}
               label='You Pay'
+              isLoading={isProtocolQuoteLoading}
             />
           </CardContent>
 
