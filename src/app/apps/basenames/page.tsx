@@ -514,7 +514,7 @@ const Page = () => {
               setStakeAmount={() => {}}
               sourceChainId={sourceChainId}
               sourceToken={sourceToken}
-              stakeAmount={'12'}
+              stakeAmount={protocolQuote?.amount[0].toString() || '0'}
               tokenBalance={tokenBalance}
               label='You Pay'
             />

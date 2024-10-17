@@ -15,6 +15,7 @@ const AmountInput = ({
   handleStakeAmountChange,
   disabled,
   label,
+  isLoading,
 }: {
   sourceChainId: ChainIds;
   sourceToken: TokenData | undefined;
@@ -24,6 +25,7 @@ const AmountInput = ({
   label?: string;
   handleStakeAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
+  isLoading?: boolean;
 }) => {
   return (
     <div className='grid w-full items-center gap-1.5'>
@@ -46,11 +48,11 @@ const AmountInput = ({
       </div>
       <div className='relative'>
         <Input
-          disabled={disabled}
+          disabled={disabled || isLoading}
           type='string'
           id='stakeAmount'
           placeholder='0.0'
-          className='h-12'
+          className={cn('h-12', isLoading ? 'animate-pulse' : '')}
           value={stakeAmount}
           onChange={handleStakeAmountChange}
           autoComplete='off'
