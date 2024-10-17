@@ -226,7 +226,7 @@ const Page = () => {
         throw new Error('No data');
       }
       if (data?.Errors?.length > 0) {
-        throw new Error(data.Errors[0].Message.title);
+        throw new Error(data.Errors[0].Message?.title || 'Error');
       }
 
       return data.PayLoad as ProtocolParamsResponse;
