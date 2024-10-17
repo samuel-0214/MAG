@@ -287,7 +287,7 @@ const Page = () => {
         throw new Error('No data');
       }
       // fetch calldata
-      const data = await fetch(INTENTS_BASE_URI + '/router-intent/external/adapter/compose-adapter-calldata', {
+      const data = await fetch(INTENTS_BASE_URI + '/router-intent/external/compose-adapter-calldata', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
