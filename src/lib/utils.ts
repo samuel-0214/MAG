@@ -7,6 +7,13 @@ import { getAddress } from 'viem';
 import { NitroTransactionReceipt } from '../types/nitro';
 import { TransactionDetails } from '@/types/intents';
 
+/**
+ * This is a workaround for the issue with BigInt serialization in JSON.stringify
+ */
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
