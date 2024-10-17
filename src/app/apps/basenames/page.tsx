@@ -530,9 +530,7 @@ const Page = () => {
               setStakeAmount={() => {}}
               sourceChainId={sourceChainId}
               sourceToken={sourceToken}
-              stakeAmount={formatNumber(
-                formatUnits(BigInt(protocolQuote?.quote[0].amountSent || 0n), sourceToken?.decimals || 18),
-              )}
+              stakeAmount={formatUnits(BigInt(protocolQuote?.quote[0].amountSent || 0n), sourceToken?.decimals || 18)}
               tokenBalance={tokenBalance}
               label='You Pay'
               isLoading={isProtocolQuoteLoading}
