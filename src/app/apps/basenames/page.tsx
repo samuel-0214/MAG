@@ -107,7 +107,7 @@ const Page = () => {
       enabled: !!debouncedBaseName,
     },
   });
-  const { data: registerPrice, isLoading: isRegisterPriceLoading } = useReadContract({
+  const { data: nameRegistrationPrice, isLoading: isRegisterPriceLoading } = useReadContract({
     abi: [
       {
         inputs: [
@@ -177,9 +177,13 @@ const Page = () => {
       sourceToken?.address,
       sourceToken?.symbol,
       sourceToken?.decimals,
+      nameRegistrationPrice,
+      isBaseNameAvailable,
+      debouncedBaseName,
+      duration,
     ],
     queryFn: async ({ signal }) => {
-      if (!sourceToken) {
+      if (!sourceToken || !nameRegistrationPrice || !isBaseNameAvailable) {
         throw new Error('Incomplete parameters');
       }
 
@@ -194,15 +198,23 @@ const Page = () => {
           SourceTokens: [
             {
               chainId: sourceChainId,
-              address: sourceToken?.address,
-              symbol: sourceToken?.symbol,
-              decimals: sourceToken?.decimals,
+              address: sourceToken.address,
+              symbol: sourceToken.symbol,
+              decimals: sourceToken.decimals,
             },
           ],
           SourceChainId: Number(sourceChainId),
           Protocol: [
             {
-              action: 'stake',
+              protocolId: 'basename',
+              chainId: '8453',
+              action: 'register',
+              poolId: 'basename-8453',
+              data: {
+                amountRequired: nameRegistrationPrice.toString(),
+                duration: duration * 3_15_36_000,
+                name: debouncedBaseName,
+              },
             },
           ],
         }),
@@ -273,7 +285,7 @@ const Page = () => {
         throw new Error('No data');
       }
       // fetch calldata
-      const data = await fetch(INTENTS_BASE_URI + '/router-intent/adapter/compose-adapter-calldata', {
+      const data = await fetch(INTENTS_BASE_URI + '/router-intent/adapter/external/compose-adapter-calldata', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -549,7 +561,7 @@ const Page = () => {
                   ${' '}
                   {isRegisterPriceLoading
                     ? 'Loading...'
-                    : formatNumber(parseFloat(formatUnits(registerPrice || 0n, 18)) * ethPriceUsd)}
+                    : formatNumber(parseFloat(formatUnits(nameRegistrationPrice || 0n, 18)) * ethPriceUsd)}
                 </span>
               </div>
             </div>

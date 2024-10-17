@@ -9,8 +9,8 @@ import MaintenanceModal from '@/components/MaintenancePopover';
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Router Intents | PoC',
-  description: 'A proof of concept for Router Crosschain Intents Framework',
+  title: 'SuperBaseNames',
+  description: 'Supercharge your experience. Buy Basenames with any token on any chain!',
 };
 
 export default function RootLayout({

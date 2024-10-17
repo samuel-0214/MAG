@@ -12,7 +12,7 @@ export const wagmiConfig = createConfig({
     injected(),
     walletConnect({ projectId: '949e50a7346865d10fe9757fe8dd9477' }),
     coinbaseWallet({
-      appName: 'Router Intents | PoC',
+      appName: 'SuperBaseNames | PoC',
     }),
   ],
   ssr: true,
