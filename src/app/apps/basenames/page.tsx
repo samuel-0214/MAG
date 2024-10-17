@@ -34,9 +34,10 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
-import { formatUnits, zeroAddress } from 'viem';
+import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import { useReadContract } from 'wagmi';
 import { Search } from 'lucide-react';
+import useTokenAllowance from '@/hooks/useTokenAllowance';
 
 const TxButtons = dynamic(() => import('@/components/TxButton'), {
   ssr: false,
@@ -346,8 +347,22 @@ const Page = () => {
     console.error('Error', error);
   }, []);
 
+  const { prioritySteps } = useTokenAllowance({
+    amount: protocolQuote?.amount[0].toString() || '0',
+    sourceChain: Number(sourceChainId),
+    spender: calldataQuote?.to,
+    token: sourceToken
+      ? {
+          address: sourceToken?.address,
+          chainId: Number(sourceChainId),
+          decimals: sourceToken?.decimals,
+        }
+      : undefined,
+    userAddress: currentAccount?.address,
+  });
+
   const { handleTransaction, isTransactionPending, transactionError, step } = useIntentTransactions({
-    intentTransaction: calldataQuote,
+    intentTransaction: calldataQuote ? { ...calldataQuote, prioritySteps } : undefined,
     chainId: sourceChainId,
     onIntentTransactionComplete,
     onIntentTransactionError,
