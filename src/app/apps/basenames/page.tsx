@@ -204,6 +204,7 @@ const Page = () => {
             },
           ],
           SourceChainId: Number(sourceChainId),
+          Amount: ['1'],
           Protocol: [
             {
               protocolId: 'basename',
