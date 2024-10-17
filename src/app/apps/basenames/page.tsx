@@ -271,10 +271,10 @@ const Page = () => {
   const balanceError = useMemo(() => {
     return !isProtocolQuoteLoading &&
       protocolQuote &&
-      Number(protocolQuote.quote[protocolQuote.quote.length - 1].amountSent) > Number(tokenBalance?.formatted)
+      Number(protocolQuote.quote[0].amountSent) > Number(tokenBalance?.value)
       ? new Error('Insufficient Funds')
       : undefined;
-  }, [isProtocolQuoteLoading, protocolQuote, tokenBalance?.formatted]);
+  }, [isProtocolQuoteLoading, protocolQuote, tokenBalance]);
 
   const {
     data: calldataQuote,
