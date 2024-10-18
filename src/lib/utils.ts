@@ -260,24 +260,6 @@ export const updateDbTransaction = async ({
   refCode?: string | '';
   // updateType: 'bulk' | 'adapter';
 }) => {
-  // bulk update
-  // curl --location 'localhost:3014/router-intent/transaction/update' \
-  // --header 'Content-Type: application/json' \
-  // --data '{
-  //     "TransactionId": "8f50c995-0380-4721-befe-e4abfb58a913",
-  //     "TransactionStatus": "FAILED",
-  //     "GasFeeUsed": "121",
-  //     "TransactionHash": "a28n3",
-  //     "AdapterStatus": [
-  //         {
-  //             "transactionId": "8f50c995-0380-4721-befe-e4abfb58a913",
-  //             "adapterIndex": "0-0-1",
-  //             "status": "FAILED",
-  //             "hash": "12asf2as1as2as"
-  //         }
-  //     ]
-  // }'
-
   const res = await fetch(INTENTS_BASE_URI + '/router-intent/transaction/update', {
     method: 'POST',
     headers: {

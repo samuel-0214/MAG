@@ -102,7 +102,7 @@ const Page = () => {
   });
 
   const baseNameError = useMemo(() => {
-    if (!isBaseNameAvailable && !isBaseNameAvailableLoading) return new Error('Basename is not available');
+    if (baseName && !isBaseNameAvailable && !isBaseNameAvailableLoading) return new Error('Basename is not available');
     // if base names include any special characters or non-alphanumeric characters
     const specialChars = /[^a-zA-Z0-9]/;
 
@@ -399,14 +399,13 @@ const Page = () => {
                 <Command shouldFilter={false}>
                   <PopoverTrigger asChild>
                     <div
-                      className='relative flex items-center border-b px-3'
+                      className={cn('relative flex items-center border-b px-3')}
                       cmdk-input-wrapper=''
                     >
                       <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
                       <CommandPrimitive.Input
                         className={cn(
-                          'z-[2] flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
-                          baseNameError ? 'ring-2  ring-red-500' : '',
+                          'ring-none z-[2] flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
                         )}
                         value={baseName}
                         onChangeCapture={handleBaseNameChange}
