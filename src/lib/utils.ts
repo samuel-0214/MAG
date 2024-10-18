@@ -32,7 +32,7 @@ export const NATIVE = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 export const fetchNitroGql = async (environment: string, query: string, variables: any) => {
   let url = '';
   if (environment === 'mainnet') {
-    url = 'https://api.pro-nitro-explorer-public.routernitro.com/graphql';
+    url = 'https://api.explorer.routernitro.com/graphql';
   } else {
     url = 'https://api.iswap-explorer-testnet.routerprotocol.com/graphql';
   }
