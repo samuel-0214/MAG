@@ -83,7 +83,7 @@ export const awaitBatchCompletion = async (batchParams: BatchParams): Promise<Ba
   );
 
   // promise for nitro
-  if (batchAdapter.adapterId === 'nitro_bridge') {
+  if (batchAdapter.adapterId === 'nitro_bridge' || batchAdapter.adapterId === 'nitro_bridge_external') {
     const { sourceChainId, destChainId, sourceTxHash } = batchParams;
 
     let environment: 'mainnet' | 'testnet' = 'mainnet';
