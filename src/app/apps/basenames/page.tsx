@@ -77,6 +77,7 @@ const Page = () => {
   });
 
   const handleBaseNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDropdownOpen(true);
     setBaseName(e.target.value.trim());
   }, []);
 
