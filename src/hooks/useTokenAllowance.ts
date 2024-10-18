@@ -50,14 +50,14 @@ const useTokenAllowance = ({
       return [
         {
           contractAddress: token?.address || zeroAddress,
-          instructionData: encodeFunctionData({
+          instructionData: 'Approve token',
+          instructionTitle: 'Approve',
+          value: '0',
+          data: encodeFunctionData({
             abi: erc20Abi,
             functionName: 'approve',
             args: [spender as `0x`, parseUnits(amount.toString(), token?.decimals || 18)],
           }),
-          instructionTitle: 'Approve',
-          value: '0',
-          data: spender,
         },
       ];
     } else {
