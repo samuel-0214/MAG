@@ -80,15 +80,6 @@ const Page = () => {
     setBaseName(e.target.value.trim());
   }, []);
 
-  const baseNameError = useMemo(() => {
-    // if base names include any special characters or non-alphanumeric characters
-    const specialChars = /[^a-zA-Z0-9]/;
-
-    if (specialChars.test(baseName)) return new Error('Basename cannot include special characters');
-
-    return baseName.includes(' ') ? new Error('Basename cannot include spaces') : undefined;
-  }, [baseName]);
-
   const { data: isBaseNameAvailable, isLoading: isBaseNameAvailableLoading } = useReadContract({
     abi: [
       {
@@ -108,6 +99,17 @@ const Page = () => {
       enabled: !!debouncedBaseName,
     },
   });
+
+  const baseNameError = useMemo(() => {
+    if (!isBaseNameAvailable && !isBaseNameAvailableLoading) return new Error('Basename is not available');
+    // if base names include any special characters or non-alphanumeric characters
+    const specialChars = /[^a-zA-Z0-9]/;
+
+    if (specialChars.test(baseName)) return new Error('Basename cannot include special characters');
+
+    return baseName.includes(' ') ? new Error('Basename cannot include spaces') : undefined;
+  }, [baseName, isBaseNameAvailable, isBaseNameAvailableLoading]);
+
   const { data: nameRegistrationPrice, isLoading: isRegisterPriceLoading } = useReadContract({
     abi: [
       {

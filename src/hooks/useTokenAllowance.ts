@@ -1,4 +1,5 @@
 import { isTokenETH } from '@/lib/utils';
+import { PrioritySteps } from '@/types/intents';
 import { useMemo } from 'react';
 import { encodeFunctionData, erc20Abi, parseUnits, zeroAddress } from 'viem';
 import { useBalance, useReadContract } from 'wagmi';
@@ -59,7 +60,7 @@ const useTokenAllowance = ({
             args: [spender as `0x`, parseUnits(amount.toString(), token?.decimals || 18)],
           }),
         },
-      ];
+      ] as PrioritySteps[];
     } else {
       return [];
     }
