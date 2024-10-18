@@ -57,14 +57,14 @@ const useTokenAllowance = ({
           data: encodeFunctionData({
             abi: erc20Abi,
             functionName: 'approve',
-            args: [spender as `0x`, parseUnits(amount.toString(), token?.decimals || 18)],
+            args: [spender as `0x`, BigInt(amount)],
           }),
         },
       ] as PrioritySteps[];
     } else {
       return [];
     }
-  }, [amount, needApproval, spender, token?.address, token?.decimals]);
+  }, [amount, needApproval, spender, token?.address]);
 
   return {
     allowance,

@@ -350,22 +350,22 @@ const Page = () => {
     console.error('Error', error);
   }, []);
 
-  const { prioritySteps } = useTokenAllowance({
-    amount: protocolQuote?.quote[0].amountSent.toString() || '0',
-    sourceChain: Number(sourceChainId),
-    spender: calldataQuote?.to,
-    token: sourceToken
-      ? {
-          address: sourceToken?.address,
-          chainId: Number(sourceChainId),
-          decimals: sourceToken?.decimals,
-        }
-      : undefined,
-    userAddress: currentAccount?.address,
-  });
+  // const { prioritySteps } = useTokenAllowance({
+  //   amount: protocolQuote?.quote[0].amountSent.toString() || '0',
+  //   sourceChain: Number(sourceChainId),
+  //   spender: calldataQuote?.to,
+  //   token: sourceToken
+  //     ? {
+  //         address: sourceToken?.address,
+  //         chainId: Number(sourceChainId),
+  //         decimals: sourceToken?.decimals,
+  //       }
+  //     : undefined,
+  //   userAddress: currentAccount?.address,
+  // });
 
   const { handleTransaction, isTransactionPending, transactionError, step } = useIntentTransactions({
-    intentTransaction: calldataQuote ? { ...calldataQuote, prioritySteps } : undefined,
+    intentTransaction: calldataQuote,
     chainId: sourceChainId,
     onIntentTransactionComplete,
     onIntentTransactionError,
