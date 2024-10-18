@@ -351,7 +351,7 @@ const Page = () => {
   }, []);
 
   const { prioritySteps } = useTokenAllowance({
-    amount: protocolQuote?.amount[0].toString() || '0',
+    amount: protocolQuote?.quote[0].amountSent.toString() || '0',
     sourceChain: Number(sourceChainId),
     spender: calldataQuote?.to,
     token: sourceToken
