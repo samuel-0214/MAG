@@ -38,6 +38,8 @@ export const getAdapterStatusFromLogs = async ({
       return getBenqiStakeStatus({ transaction, adapter });
     case 'nitro_bridge':
       return getNitroBridgeStatus({ transaction, adapter });
+    case 'nitro_bridge_external':
+      return getNitroBridgeStatus({ transaction, adapter });
     case 'lido':
       getLidoStakeStatus({ transaction, adapter });
   }
