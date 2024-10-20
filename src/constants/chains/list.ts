@@ -27,63 +27,64 @@ import { xLayer } from './xLayer';
 
 export const MAINNET_CHAIN_NAMES: { [key in ChainIds]?: Chains } = {
   // evm
-  [CHAIN_IDS.ethereum]: 'ethereum',
   [CHAIN_IDS.polygon]: 'polygon',
   [CHAIN_IDS.arbitrum]: 'arbitrum',
-  [CHAIN_IDS.optimism]: 'optimism',
-  [CHAIN_IDS.zksync]: 'zksync',
   [CHAIN_IDS.avalanche]: 'avalanche',
   [CHAIN_IDS.binance]: 'binance',
   [CHAIN_IDS.linea]: 'linea',
-  [CHAIN_IDS.polygon_zkevm]: 'polygon_zkevm',
-  [CHAIN_IDS.manta]: 'manta',
-  [CHAIN_IDS.scroll]: 'scroll',
-  [CHAIN_IDS.mantle]: 'mantle',
   [CHAIN_IDS.base]: 'base',
-  [CHAIN_IDS.blast]: 'blast',
-  [CHAIN_IDS.xlayer]: 'xlayer',
+
+  // [CHAIN_IDS.ethereum]: 'ethereum',
+  // [CHAIN_IDS.optimism]: 'optimism',
+  // [CHAIN_IDS.zksync]: 'zksync',
+  // [CHAIN_IDS.polygon_zkevm]: 'polygon_zkevm',
+  // [CHAIN_IDS.manta]: 'manta',
+  // [CHAIN_IDS.scroll]: 'scroll',
+  // [CHAIN_IDS.mantle]: 'mantle',
+  // [CHAIN_IDS.blast]: 'blast',
+  // [CHAIN_IDS.xlayer]: 'xlayer',
 
   // tron
   // [CHAIN_IDS.tron]: 'tron',
 } as const;
 export const MAINNET_CHAIN_IDS: { [key in Chains]?: ChainIds } = {
   // evm
-  ethereum: CHAIN_IDS.ethereum,
   polygon: CHAIN_IDS.polygon,
+  // ethereum: CHAIN_IDS.ethereum,
   arbitrum: CHAIN_IDS.arbitrum,
-  optimism: CHAIN_IDS.optimism,
-  zksync: CHAIN_IDS.zksync,
-  avalanche: CHAIN_IDS.avalanche,
-  binance: CHAIN_IDS.binance,
-  linea: CHAIN_IDS.linea,
-  polygon_zkevm: CHAIN_IDS.polygon_zkevm,
-  manta: CHAIN_IDS.manta,
-  scroll: CHAIN_IDS.scroll,
-  mantle: CHAIN_IDS.mantle,
-  base: CHAIN_IDS.base,
-  blast: CHAIN_IDS.blast,
-  xlayer: CHAIN_IDS.xlayer,
-
-  // tron
-  // tron: CHAIN_IDS.tron,
-} as const;
-
-export const MAINNET_SUPPORTED_CHAIN_IDS: { [key in Chains]?: ChainIds } = {
-  ethereum: CHAIN_IDS.ethereum,
-  polygon: CHAIN_IDS.polygon,
-  arbitrum: CHAIN_IDS.arbitrum,
-  optimism: CHAIN_IDS.optimism,
+  // optimism: CHAIN_IDS.optimism,
   // zksync: CHAIN_IDS.zksync,
   avalanche: CHAIN_IDS.avalanche,
   binance: CHAIN_IDS.binance,
   linea: CHAIN_IDS.linea,
   // polygon_zkevm: CHAIN_IDS.polygon_zkevm,
   // manta: CHAIN_IDS.manta,
-  scroll: CHAIN_IDS.scroll,
-  mantle: CHAIN_IDS.mantle,
+  // scroll: CHAIN_IDS.scroll,
+  // mantle: CHAIN_IDS.mantle,
   base: CHAIN_IDS.base,
-  blast: CHAIN_IDS.blast,
-  xlayer: CHAIN_IDS.xlayer,
+  // blast: CHAIN_IDS.blast,
+  // xlayer: CHAIN_IDS.xlayer,
+
+  // tron
+  // tron: CHAIN_IDS.tron,
+} as const;
+
+export const MAINNET_SUPPORTED_CHAIN_IDS: { [key in Chains]?: ChainIds } = {
+  // ethereum: CHAIN_IDS.ethereum,
+  polygon: CHAIN_IDS.polygon,
+  arbitrum: CHAIN_IDS.arbitrum,
+  // optimism: CHAIN_IDS.optimism,
+  // zksync: CHAIN_IDS.zksync,
+  avalanche: CHAIN_IDS.avalanche,
+  binance: CHAIN_IDS.binance,
+  linea: CHAIN_IDS.linea,
+  // polygon_zkevm: CHAIN_IDS.polygon_zkevm,
+  // manta: CHAIN_IDS.manta,
+  // scroll: CHAIN_IDS.scroll,
+  // mantle: CHAIN_IDS.mantle,
+  base: CHAIN_IDS.base,
+  // blast: CHAIN_IDS.blast,
+  // xlayer: CHAIN_IDS.xlayer,
 
   // tron
   // tron: CHAIN_IDS.tron,

@@ -1,5 +1,5 @@
 'use client';
-
+import Lottie from 'react-lottie';
 import AmountInput from '@/components/AmountInput';
 import CurrencyAndChainSelector from '@/components/CurrencyAndChainSelector';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { Command as CommandPrimitive } from 'cmdk';
+import confetti from '@/assets/confetti.json';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -26,18 +27,23 @@ import useIntentTransactions from '@/hooks/useIntentCalldata';
 import useTokenData from '@/hooks/useTokenData';
 import { getSecondsToDurationString } from '@/lib/duration';
 import { formatNumber } from '@/lib/formatNumber';
-import { NATIVE, cn, updateDbTransaction } from '@/lib/utils';
+import { NATIVE, cn, shortenAddress, updateDbTransaction } from '@/lib/utils';
 import { ComposeCalldataResponse, FeeQuoteCalldataResponse, ProtocolParamsResponse } from '@/types/intents';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { CommandLoading } from 'cmdk';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
-import { formatUnits, parseUnits, zeroAddress } from 'viem';
-import { useReadContract } from 'wagmi';
+import { encodeFunctionData, formatUnits, parseUnits, zeroAddress } from 'viem';
+import { useReadContract, useSendTransaction } from 'wagmi';
 import { Search } from 'lucide-react';
 import useTokenAllowance from '@/hooks/useTokenAllowance';
+import IntentTransaction from '@/components/Transaction/IntentTransaction';
+import useConfetti from '@/hooks/useConfetti';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { waitForTransactionReceipt } from '@wagmi/core';
+import { wagmiConfig } from '@/context/WagmiContext';
 
 const TxButtons = dynamic(() => import('@/components/TxButton'), {
   ssr: false,
@@ -50,6 +56,18 @@ const TxButtons = dynamic(() => import('@/components/TxButton'), {
     </Button>
   ),
 });
+
+const BASE_REGISTRAR_CONTROLLER = '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5';
+const REVERSE_REGISTRAR = '0x79ea96012eea67a83431f1701b3dff7e37f9e282';
+
+const confettiOption = {
+  loop: false,
+  autoplay: true,
+  animationData: confetti,
+  rendererSettings: {
+    preserveAspectRatio: 'xMidYMid slice',
+  },
+};
 
 const Page = () => {
   const router = useRouter();
@@ -64,6 +82,11 @@ const Page = () => {
   // duration in years
   const [duration, setDuration] = useState<number>(1);
 
+  const [buyTxHash, setBuyTxHash] = useState<string>('');
+  const [openTxScreen, setOpenTxScreen] = useState<boolean>(false);
+  const [enablePrimarySection, setEnablePrimarySection] = useState<boolean>(false);
+  const { showConfetti, setShowConfetti } = useConfetti();
+  const [showDialog, setShowDialog] = useState<boolean>(true);
   const { currentAccount, currentChainId } = useWalletContext();
 
   useEffect(() => {
@@ -333,36 +356,20 @@ const Page = () => {
 
   const onIntentTransactionComplete = useCallback(
     (txHash: string) => {
+      setBuyTxHash(txHash);
+      setOpenTxScreen(true);
       updateDbTransaction({
         id: calldataQuote?.trnxId!,
         hash: txHash,
         status: 'COMPLETED',
         gasFee: '0',
-      }).then(() => {
-        clearInputs();
-        // open tx page
-        router.push(`/tx/${txHash}`);
       });
     },
-    [calldataQuote?.trnxId, clearInputs, router],
+    [calldataQuote?.trnxId],
   );
   const onIntentTransactionError = useCallback((error: Error) => {
     console.error('Error', error);
   }, []);
-
-  // const { prioritySteps } = useTokenAllowance({
-  //   amount: protocolQuote?.quote[0].amountSent.toString() || '0',
-  //   sourceChain: Number(sourceChainId),
-  //   spender: calldataQuote?.to,
-  //   token: sourceToken
-  //     ? {
-  //         address: sourceToken?.address,
-  //         chainId: Number(sourceChainId),
-  //         decimals: sourceToken?.decimals,
-  //       }
-  //     : undefined,
-  //   userAddress: currentAccount?.address,
-  // });
 
   const { handleTransaction, isTransactionPending, transactionError, step } = useIntentTransactions({
     intentTransaction: calldataQuote,
@@ -371,12 +378,335 @@ const Page = () => {
     onIntentTransactionError,
   });
 
+  const { sendTransactionAsync } = useSendTransaction();
+  const {
+    mutateAsync: handlePrimaryNameTransaction,
+    data: primaryNameTx,
+    isPending: isSettingPrimaryName,
+    error: primaryNameTxError,
+  } = useMutation({
+    mutationKey: ['primary name transaction', baseName],
+    mutationFn: async () => {
+      const txHash = await sendTransactionAsync({
+        chainId: 8453,
+        to: REVERSE_REGISTRAR,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: [
+            {
+              inputs: [{ internalType: 'string', name: 'name', type: 'string' }],
+              name: 'setName',
+              outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+              stateMutability: 'nonpayable',
+              type: 'function',
+            },
+          ] as const,
+          args: [baseName],
+          functionName: 'setName',
+        }),
+      });
+
+      setShowDialog(true);
+      await waitForTransactionReceipt(wagmiConfig, {
+        hash: txHash,
+        chainId: 8453,
+      });
+
+      return txHash;
+    },
+    onMutate: () => {
+      setShowConfetti(true);
+    },
+  });
+
   return (
     <>
-      <div className='mx-auto flex w-full max-w-[50ch] flex-col gap-2'>
-        <Card className='rounded-2xl'>
+      <div className='mx-auto flex w-full flex-wrap justify-center gap-2'>
+        <Card className='max-w-[50ch] flex-1 rounded-2xl'>
           <CardHeader>
-            <CardTitle className='text-3xl text-blue-500'>Super Basenames</CardTitle>
+            <CardTitle className='text-3xl text-blue-500'>1. Get Basename</CardTitle>
+          </CardHeader>
+
+          {openTxScreen ? (
+            <div className='overflow-auto'>
+              <IntentTransaction
+                txHash={buyTxHash}
+                onTxComplete={() => setEnablePrimarySection(true)}
+              />
+            </div>
+          ) : (
+            <>
+              <CardContent className='flex flex-col gap-4'>
+                <div className='grid w-full items-center gap-1.5'>
+                  <div className='flex justify-between'>
+                    <Label
+                      className={cn('font-normal')}
+                      htmlFor='basename'
+                    >
+                      Your Basename
+                    </Label>
+
+                    {baseNameError && (
+                      <span className='text-sm leading-none text-red-500'>{baseNameError.message}</span>
+                    )}
+                  </div>
+
+                  <Popover
+                    open={dropdownOpen}
+                    onOpenChange={setDropdownOpen}
+                  >
+                    <Command shouldFilter={false}>
+                      <PopoverTrigger asChild>
+                        <div
+                          className={cn('relative flex items-center border-b px-3')}
+                          cmdk-input-wrapper=''
+                        >
+                          <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
+                          <CommandPrimitive.Input
+                            className={cn(
+                              'ring-none z-[2] flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                            )}
+                            value={baseName}
+                            onChangeCapture={handleBaseNameChange}
+                            placeholder='Search rednobull.base.eth'
+                          />
+
+                          {baseName && (
+                            <span className='absolute top-1/2 z-[1] ml-8 -translate-y-1/2 select-none text-sm opacity-50'>
+                              <span className='text-transparent'>{baseName}</span>
+                              <span>.base.eth</span>
+                            </span>
+                          )}
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className='w-[--radix-popover-trigger-width] p-0'
+                        onOpenAutoFocus={(e) => e.preventDefault()}
+                      >
+                        <CommandList>
+                          <CommandEmpty>Start by finding your name!</CommandEmpty>
+
+                          {baseName ? (
+                            <CommandItem
+                              className='h-10'
+                              key={`${baseName} .base.eth`}
+                              disabled={!isBaseNameAvailable}
+                              onSelect={() => {
+                                setBaseName(baseName);
+                                setDropdownOpen(false);
+                              }}
+                            >
+                              <span className='mr-2'>
+                                {baseName}
+                                <span className='opacity-75'>.base.eth</span>
+                              </span>
+                              {isBaseNameAvailableLoading ||
+                              isBaseNameAvailable === undefined ||
+                              baseName !== debouncedBaseName ? (
+                                <span className='text-xs text-neutral-500/80'>Checking...</span>
+                              ) : isBaseNameAvailable ? (
+                                <span className='text-xs text-blue-500/80'>Available</span>
+                              ) : (
+                                <span className='text-xs text-red-500/80'>Unavailable</span>
+                              )}
+                            </CommandItem>
+                          ) : (
+                            <CommandItem disabled={true}>Search for a name</CommandItem>
+                          )}
+
+                          {!isSuggestionsLoading && suggestions && suggestions?.length > 0 && (
+                            <CommandGroup heading='Suggestions'>
+                              <CommandSeparator />
+                              {suggestions.map((suggestion, index) => (
+                                <CommandItem
+                                  className='h-10'
+                                  key={`${suggestion} .base.eth ${index}`}
+                                  onSelect={() => {
+                                    setBaseName(suggestion);
+                                    setDropdownOpen(false);
+                                  }}
+                                >
+                                  <span>{suggestion}</span>
+                                  <span className='opacity-75'>.base.eth</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </PopoverContent>
+                    </Command>
+                  </Popover>
+                </div>
+
+                {/* duration in years */}
+                <div className='grid w-full items-center gap-1.5'>
+                  <div className='flex justify-between'>
+                    <Label
+                      className={cn('font-normal')}
+                      htmlFor='duration'
+                    >
+                      Reserve Basename for
+                    </Label>
+                  </div>
+
+                  {/* plus, minus buttons around the current value */}
+                  <div className='flex gap-2'>
+                    <Button
+                      variant='outline'
+                      onClick={() => duration > 1 && setDuration(duration - 1)}
+                    >
+                      -
+                    </Button>
+
+                    <Input
+                      className='w-full text-center'
+                      type='text'
+                      value={`${duration} year${duration > 1 ? 's' : ''}`}
+                      onChange={() => {}}
+                    />
+
+                    <Button
+                      variant='outline'
+                      onClick={() => setDuration(duration + 1)}
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator className='my-4' />
+                <CurrencyAndChainSelector
+                  setSourceChainId={setSourceChainId}
+                  setSourceToken={setSourceToken}
+                  sourceChainId={sourceChainId}
+                  sourceToken={sourceToken}
+                  testnet={false}
+                  networkLabel='Pay from'
+                  tokenLabel='Pay with'
+                />
+
+                <AmountInput
+                  handleStakeAmountChange={() => {}}
+                  disabled={false}
+                  setStakeAmount={() => {}}
+                  sourceChainId={sourceChainId}
+                  sourceToken={sourceToken}
+                  stakeAmount={formatUnits(
+                    BigInt(protocolQuote?.quote[0].amountSent || 0n),
+                    sourceToken?.decimals || 18,
+                  )}
+                  tokenBalance={tokenBalance}
+                  label='You Pay'
+                  isLoading={isProtocolQuoteLoading}
+                />
+              </CardContent>
+
+              <CardFooter className='mt-8 flex flex-col gap-4'>
+                <div className='grid w-full grid-cols-3 gap-2 rounded-xl border border-neutral-800 bg-background/25 p-2'>
+                  <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
+                    <span className='text-xs'>ETA</span>
+                    <span
+                      className={cn(
+                        'text-base font-medium text-neutral-300',
+                        isProtocolQuoteLoading ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent' : '',
+                      )}
+                    >
+                      {isProtocolQuoteLoading
+                        ? 'Loading...'
+                        : protocolQuote
+                          ? getSecondsToDurationString(protocolQuote?.estimatedTime || 0)
+                          : '--'}
+                    </span>
+                  </div>
+                  <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
+                    <span className='text-xs'>Bridge Fee</span>
+                    <span
+                      className={cn(
+                        'text-base font-medium text-neutral-300',
+                        isProtocolQuoteLoading || isfeeQuoteLoading
+                          ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent'
+                          : '',
+                      )}
+                    >
+                      $ {isProtocolQuoteLoading || isfeeQuoteLoading ? 'Loading...' : formatNumber(bridgeFee)}
+                    </span>
+                  </div>
+                  <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
+                    <span className='text-xs'>Registration Fee</span>
+                    <span
+                      className={cn(
+                        'text-base font-medium text-neutral-300',
+                        isRegisterPriceLoading ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent' : '',
+                      )}
+                    >
+                      ${' '}
+                      {isRegisterPriceLoading
+                        ? 'Loading...'
+                        : formatNumber(parseFloat(formatUnits(nameRegistrationPrice || 0n, 18)) * ethPriceUsd)}
+                    </span>
+                  </div>
+                </div>
+
+                <TxButtons
+                  className='w-full'
+                  chainId={sourceChainId}
+                  label={'Set as Primary Name'}
+                  error={undefined}
+                  handleComplete={() => {}}
+                  handleTransaction={handleTransaction}
+                  isDisabled={
+                    !protocolQuote ||
+                    !calldataQuote ||
+                    isProtocolQuoteLoading ||
+                    isCallDataQuoteLoading ||
+                    isTransactionPending
+                  }
+                  isLoading={isCallDataQuoteLoading || isProtocolQuoteFetching}
+                  isSubmitting={isTransactionPending}
+                  success={false}
+                  errorLabel={
+                    protocolQuoteError
+                      ? protocolQuoteError.message
+                      : balanceError
+                        ? balanceError.message
+                        : 'Something went wrong'
+                  }
+                  loadingLabel={
+                    isCallDataQuoteLoading
+                      ? 'Building Transaction'
+                      : isProtocolQuoteLoading || isProtocolQuoteFetching
+                        ? 'Fetching Quote'
+                        : undefined
+                  }
+                  successLabel={`Bought ${baseName}.base.eth!`}
+                />
+
+                {buyTxHash && (
+                  <Button
+                    className='w-full'
+                    onClick={() => window.open('/tx/' + buyTxHash, '_blank')}
+                  >
+                    View Transaction
+                  </Button>
+                )}
+              </CardFooter>
+            </>
+          )}
+        </Card>
+
+        {/* Set as primary name */}
+        <Card
+          className={cn(
+            'h-min max-w-[50ch] flex-1 rounded-2xl',
+            buyTxHash && enablePrimarySection ? 'opacity-100' : 'pointer-events-none opacity-50',
+          )}
+        >
+          <CardHeader>
+            <CardTitle className='text-3xl text-blue-500'>2. Set as Primary Name</CardTitle>
+            <CardDescription className='text-neutral-300'>
+              Set your new Basename as your primary name on ENS. This will resolve your account address to{' '}
+              {baseName || 'name'}.base.eth
+            </CardDescription>
           </CardHeader>
 
           <CardContent className='flex flex-col gap-4'>
@@ -388,243 +718,65 @@ const Page = () => {
                 >
                   Your Basename
                 </Label>
-
-                {baseNameError && <span className='text-sm leading-none text-red-500'>{baseNameError.message}</span>}
               </div>
 
-              <Popover
-                open={dropdownOpen}
-                onOpenChange={setDropdownOpen}
-              >
-                <Command shouldFilter={false}>
-                  <PopoverTrigger asChild>
-                    <div
-                      className={cn('relative flex items-center border-b px-3')}
-                      cmdk-input-wrapper=''
-                    >
-                      <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
-                      <CommandPrimitive.Input
-                        className={cn(
-                          'ring-none z-[2] flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
-                        )}
-                        value={baseName}
-                        onChangeCapture={handleBaseNameChange}
-                        placeholder='Search rednobull.base.eth'
-                      />
-
-                      {baseName && (
-                        <span className='absolute top-1/2 z-[1] ml-8 -translate-y-1/2 select-none text-sm opacity-50'>
-                          <span className='text-transparent'>{baseName}</span>
-                          <span>.base.eth</span>
-                        </span>
-                      )}
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className='w-[--radix-popover-trigger-width] p-0'
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                  >
-                    <CommandList>
-                      <CommandEmpty>Start by finding your name!</CommandEmpty>
-
-                      {baseName ? (
-                        <CommandItem
-                          className='h-10'
-                          key={`${baseName} .base.eth`}
-                          disabled={!isBaseNameAvailable}
-                          onSelect={() => {
-                            setBaseName(baseName);
-                            setDropdownOpen(false);
-                          }}
-                        >
-                          <span className='mr-2'>
-                            {baseName}
-                            <span className='opacity-75'>.base.eth</span>
-                          </span>
-                          {isBaseNameAvailableLoading ||
-                          isBaseNameAvailable === undefined ||
-                          baseName !== debouncedBaseName ? (
-                            <span className='text-xs text-neutral-500/80'>Checking...</span>
-                          ) : isBaseNameAvailable ? (
-                            <span className='text-xs text-blue-500/80'>Available</span>
-                          ) : (
-                            <span className='text-xs text-red-500/80'>Unavailable</span>
-                          )}
-                        </CommandItem>
-                      ) : (
-                        <CommandItem disabled={true}>Search for a name</CommandItem>
-                      )}
-
-                      {!isSuggestionsLoading && suggestions && suggestions?.length > 0 && (
-                        <CommandGroup heading='Suggestions'>
-                          <CommandSeparator />
-                          {suggestions.map((suggestion, index) => (
-                            <CommandItem
-                              className='h-10'
-                              key={`${suggestion} .base.eth ${index}`}
-                              onSelect={() => {
-                                setBaseName(suggestion);
-                                setDropdownOpen(false);
-                              }}
-                            >
-                              <span>{suggestion}</span>
-                              <span className='opacity-75'>.base.eth</span>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      )}
-                    </CommandList>
-                  </PopoverContent>
-                </Command>
-              </Popover>
+              <Input
+                className='w-full'
+                type='text'
+                value={baseName || 'name' + '.base.eth'}
+                onChange={() => {}}
+              />
             </div>
-
-            {/* duration in years */}
-            <div className='grid w-full items-center gap-1.5'>
-              <div className='flex justify-between'>
-                <Label
-                  className={cn('font-normal')}
-                  htmlFor='duration'
-                >
-                  Reserve Basename for
-                </Label>
-              </div>
-
-              {/* plus, minus buttons around the current value */}
-              <div className='flex gap-2'>
-                <Button
-                  variant='outline'
-                  onClick={() => duration > 1 && setDuration(duration - 1)}
-                >
-                  -
-                </Button>
-
-                <Input
-                  className='w-full text-center'
-                  type='text'
-                  value={`${duration} year${duration > 1 ? 's' : ''}`}
-                  onChange={() => {}}
-                />
-
-                <Button
-                  variant='outline'
-                  onClick={() => setDuration(duration + 1)}
-                >
-                  +
-                </Button>
-              </div>
-            </div>
-
-            <Separator className='my-4' />
-            <CurrencyAndChainSelector
-              setSourceChainId={setSourceChainId}
-              setSourceToken={setSourceToken}
-              sourceChainId={sourceChainId}
-              sourceToken={sourceToken}
-              testnet={false}
-              networkLabel='Pay from'
-              tokenLabel='Pay with'
-            />
-
-            <AmountInput
-              handleStakeAmountChange={() => {}}
-              disabled={false}
-              setStakeAmount={() => {}}
-              sourceChainId={sourceChainId}
-              sourceToken={sourceToken}
-              stakeAmount={formatUnits(BigInt(protocolQuote?.quote[0].amountSent || 0n), sourceToken?.decimals || 18)}
-              tokenBalance={tokenBalance}
-              label='You Pay'
-              isLoading={isProtocolQuoteLoading}
-            />
           </CardContent>
 
           <CardFooter className='mt-8 flex flex-col gap-4'>
-            <div className='grid w-full grid-cols-3 gap-2 rounded-xl border border-neutral-800 bg-background/25 p-2'>
-              <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
-                <span className='text-xs'>ETA</span>
-                <span
-                  className={cn(
-                    'text-base font-medium text-neutral-300',
-                    isProtocolQuoteLoading ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent' : '',
-                  )}
-                >
-                  {isProtocolQuoteLoading
-                    ? 'Loading...'
-                    : protocolQuote
-                      ? getSecondsToDurationString(protocolQuote?.estimatedTime || 0)
-                      : '--'}
-                </span>
-              </div>
-              <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
-                <span className='text-xs'>Bridge Fee</span>
-                <span
-                  className={cn(
-                    'text-base font-medium text-neutral-300',
-                    isProtocolQuoteLoading || isfeeQuoteLoading
-                      ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent'
-                      : '',
-                  )}
-                >
-                  $ {isProtocolQuoteLoading || isfeeQuoteLoading ? 'Loading...' : formatNumber(bridgeFee)}
-                </span>
-              </div>
-              <div className={'flex flex-col gap-1 rounded-md bg-background/40 p-2 text-neutral-400'}>
-                <span className='text-xs'>Registration Fee</span>
-                <span
-                  className={cn(
-                    'text-base font-medium text-neutral-300',
-                    isRegisterPriceLoading ? 'animate-pulse rounded-xs bg-foreground/10 text-transparent' : '',
-                  )}
-                >
-                  ${' '}
-                  {isRegisterPriceLoading
-                    ? 'Loading...'
-                    : formatNumber(parseFloat(formatUnits(nameRegistrationPrice || 0n, 18)) * ethPriceUsd)}
-                </span>
-              </div>
-            </div>
-
             <TxButtons
               className='w-full'
-              chainId={sourceChainId}
-              label={
-                calldataQuote?.prioritySteps[step]
-                  ? calldataQuote?.prioritySteps[step].instructionTitle || 'Transact'
-                  : 'Buy Basename'
-              }
-              error={calldataQuoteError || transactionError || protocolQuoteError || balanceError}
+              chainId={'8453'}
+              label={'Set as Primary Name'}
+              error={null}
               handleComplete={() => {}}
-              handleTransaction={handleTransaction}
-              isDisabled={
-                !protocolQuote ||
-                !calldataQuote ||
-                isProtocolQuoteLoading ||
-                isCallDataQuoteLoading ||
-                isTransactionPending
-              }
-              isLoading={isCallDataQuoteLoading || isProtocolQuoteFetching}
-              isSubmitting={isTransactionPending}
-              success={false}
-              errorLabel={
-                protocolQuoteError
-                  ? protocolQuoteError.message
-                  : balanceError
-                    ? balanceError.message
-                    : 'Something went wrong'
-              }
-              loadingLabel={
-                isCallDataQuoteLoading
-                  ? 'Building Transaction'
-                  : isProtocolQuoteLoading || isProtocolQuoteFetching
-                    ? 'Fetching Quote'
-                    : undefined
-              }
-              successLabel='Staked Successfully'
+              handleTransaction={handlePrimaryNameTransaction}
+              isDisabled={!buyTxHash}
+              isLoading={false}
+              isSubmitting={isSettingPrimaryName}
+              success={!!primaryNameTx}
+              errorLabel={'Something went wrong'}
+              loadingLabel={'Loading'}
+              successLabel='Successfully set as primary name!'
             />
           </CardFooter>
         </Card>
       </div>
+
+      <Dialog
+        open={showDialog}
+        onOpenChange={(open) => setShowDialog(open)}
+        modal={true}
+      >
+        <DialogContent className='p-0'>
+          <DialogHeader className='px-4 pt-4'>
+            <DialogTitle>Bought {baseName}.base.eth!</DialogTitle>
+          </DialogHeader>
+          <div className='p-4 pt-4'>
+            <DialogDescription>
+              {`${baseName}.base.eth`} has been successfully purchased and set as your primary name on ENS.
+            </DialogDescription>
+          </div>
+          {showConfetti && (
+            <>
+              <div className='absolute left-1/2 top-0 z-50 h-full w-full -translate-x-1/2 cursor-default touch-none '>
+                <Lottie
+                  isClickToPauseDisabled={true}
+                  options={confettiOption}
+                  height={500}
+                  width={500}
+                />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
