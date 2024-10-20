@@ -86,7 +86,7 @@ const Page = () => {
   const [openTxScreen, setOpenTxScreen] = useState<boolean>(false);
   const [enablePrimarySection, setEnablePrimarySection] = useState<boolean>(false);
   const { showConfetti, setShowConfetti } = useConfetti();
-  const [showDialog, setShowDialog] = useState<boolean>(true);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
   const { currentAccount, currentChainId } = useWalletContext();
 
   useEffect(() => {
