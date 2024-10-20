@@ -650,7 +650,7 @@ const Page = () => {
                 <TxButtons
                   className='w-full'
                   chainId={sourceChainId}
-                  label={'Set as Primary Name'}
+                  label={'Buy Basename'}
                   error={undefined}
                   handleComplete={() => {}}
                   handleTransaction={handleTransaction}
