@@ -427,7 +427,7 @@ const Page = () => {
             <CardTitle className='text-3xl text-blue-500'>1. Get Basename</CardTitle>
           </CardHeader>
 
-          {openTxScreen ? (
+          {openTxScreen && buyTxHash ? (
             <div className='overflow-auto'>
               <IntentTransaction
                 txHash={buyTxHash}

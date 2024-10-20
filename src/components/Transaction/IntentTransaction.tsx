@@ -21,6 +21,7 @@ const IntentTransaction = ({
       return res as TransactionDetails;
     },
     enabled: !!txHash,
+    retry: true,
     refetchOnWindowFocus: false,
   });
   return (
