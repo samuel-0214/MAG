@@ -355,15 +355,15 @@ const Page = () => {
   const clearInputs = useCallback(() => {}, []);
 
   const onIntentTransactionComplete = useCallback(
-    (txHash: string) => {
-      updateDbTransaction({
+    async (txHash: string) => {
+      setOpenTxScreen(true);
+      await updateDbTransaction({
         id: calldataQuote?.trnxId!,
         hash: txHash,
         status: 'COMPLETED',
         gasFee: '0',
       }).then(() => {
         setBuyTxHash(txHash);
-        setOpenTxScreen(true);
       });
     },
     [calldataQuote?.trnxId],
@@ -651,8 +651,12 @@ const Page = () => {
                 <TxButtons
                   className='w-full'
                   chainId={sourceChainId}
-                  label={'Buy Basename'}
-                  error={undefined}
+                  label={
+                    calldataQuote?.prioritySteps[step]
+                      ? calldataQuote?.prioritySteps[step].instructionTitle || 'Transact'
+                      : 'Buy Basename'
+                  }
+                  error={calldataQuoteError || transactionError || protocolQuoteError || balanceError}
                   handleComplete={() => {}}
                   handleTransaction={handleTransaction}
                   isDisabled={
@@ -679,7 +683,7 @@ const Page = () => {
                         ? 'Fetching Quote'
                         : undefined
                   }
-                  successLabel={`Bought ${baseName}.base.eth!`}
+                  successLabel='Bought Basename!'
                 />
 
                 {buyTxHash && (
