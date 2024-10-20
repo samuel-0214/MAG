@@ -763,20 +763,20 @@ const Page = () => {
               {`${baseName}.base.eth`} has been successfully purchased and set as your primary name on ENS.
             </DialogDescription>
           </div>
-          {showConfetti && (
-            <>
-              <div className='absolute left-1/2 top-0 z-50 h-full w-full -translate-x-1/2 cursor-default touch-none '>
-                <Lottie
-                  isClickToPauseDisabled={true}
-                  options={confettiOption}
-                  height={500}
-                  width={500}
-                />
-              </div>
-            </>
-          )}
         </DialogContent>
       </Dialog>
+      {showConfetti && (
+        <>
+          <div className='absolute left-1/2 top-0 z-50 h-full w-full -translate-x-1/2 cursor-default touch-none '>
+            <Lottie
+              isClickToPauseDisabled={true}
+              options={confettiOption}
+              height={500}
+              width={500}
+            />
+          </div>
+        </>
+      )}
     </>
   );
 };

@@ -8,7 +8,7 @@ const useConfetti = () => {
 
     const timeout = setTimeout(() => {
       setShowConfetti(false);
-    }, 1500);
+    }, 5000);
     return () => clearTimeout(timeout);
   }, [showConfetti]);
   return {
