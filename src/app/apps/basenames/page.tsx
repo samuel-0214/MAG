@@ -356,13 +356,14 @@ const Page = () => {
 
   const onIntentTransactionComplete = useCallback(
     (txHash: string) => {
-      setBuyTxHash(txHash);
-      setOpenTxScreen(true);
       updateDbTransaction({
         id: calldataQuote?.trnxId!,
         hash: txHash,
         status: 'COMPLETED',
         gasFee: '0',
+      }).then(() => {
+        setBuyTxHash(txHash);
+        setOpenTxScreen(true);
       });
     },
     [calldataQuote?.trnxId],
