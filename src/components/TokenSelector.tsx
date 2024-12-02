@@ -12,13 +12,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CHAINS, ChainIds } from '@/constants/chains';
 import { TOKEN_SYMBOL_MAP, Token } from '@/constants/tokens';
 import { useWalletContext } from '@/context/WalletContext';
-import useTokenData from '@/hooks/useTokenData';
 import { formatNumber } from '@/lib/formatNumber';
 import { NATIVE, cn, getTokenLogoURI, isTokenETH } from '@/lib/utils';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, ChevronDown, Search } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
 
 export const TokenSelector = ({
   sourceChainId,

@@ -20,7 +20,6 @@ import {
   ProviderNotFoundError,
 } from '@wagmi/core';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
 import { useConnect, useConnections } from 'wagmi';
 import { useTronContext } from './TronContext';
 import { Adapter } from '@tronweb3/tronwallet-abstract-adapter';
@@ -460,11 +459,6 @@ const WalletContextProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('[WALLET] EVM connections updated');
     handleEvmConnectionChanges(evmconnections);
   }, [evmconnections, handleEvmConnectionChanges]);
-
-  useEffect(() => {
-    console.log('[WALLET] Tron adapter updated');
-    handleTronConnectionChanges(tronAdapter);
-  }, [tronAdapter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAccountChanges = useCallback(
     ({

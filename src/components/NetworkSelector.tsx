@@ -9,7 +9,6 @@ import { Command as CommandPrimitive } from 'cmdk';
 import { Check, ChevronDown, Search } from 'lucide-react';
 import Image from 'next/image';
 import React, { ElementRef, useEffect, useRef, useState } from 'react';
-import { useWindowSize } from 'usehooks-ts';
 
 const NetworkSelector = ({
   currentChainId,

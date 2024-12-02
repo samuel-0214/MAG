@@ -1,13 +1,11 @@
 import React from 'react';
 import { Button } from '../ui/button';
 import { AdapterMapItem, BatchData } from '@/types';
-import useSendTransaction from '@/hooks/useSendTransaction';
 import { simulateContract } from '@wagmi/core';
 import { wagmiConfig } from '@/context/WagmiContext';
 import { decodeEventLog, encodeFunctionData, parseEventLogs, zeroAddress } from 'viem';
 import { getTransactionReceiptFromChain } from '@/lib/getTransactionFromChain';
 import { ChainIds, CHAINS } from '@/constants/chains';
-import useSwitchChains from '@/hooks/useSwitchChain';
 import { useWalletContext } from '@/context/WalletContext';
 import { capitalized } from '@/lib/utils';
 

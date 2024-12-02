@@ -4,7 +4,6 @@ import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronDown } from 'lucide-react';
 import React, { ElementRef, useEffect, useRef, useState } from 'react';
-import { useWindowSize } from 'usehooks-ts';
 
 const FeeSelector = ({
   currentFee,
